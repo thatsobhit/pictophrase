@@ -1,19 +1,26 @@
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Input, Dense, LSTM, Embedding, Dropout, Add
+from tensorflow.keras.layers import Input, Dense, LSTM, Embedding, Dropout, Add, RepeatVector, Concatenate, Activation
 
 def build_caption_model(vocab_size, max_length):
-    inputs1 = Input(shape=(2048,))
-    fe1 = Dropout(0.5)(inputs1)
-    fe2 = Dense(256, activation='relu')(fe1)
+    # Feature input
+    features_input = Input(shape=(2048,))
+    features_dense = Dense(256, activation='relu')(features_input)
+    features_repeat = RepeatVector(max_length)(features_dense)
 
-    inputs2 = Input(shape=(max_length,))
-    se1 = Embedding(vocab_size, 256, mask_zero=True)(inputs2)
-    se2 = Dropout(0.5)(se1)
-    se3 = LSTM(256)(se2)
+    # Caption input
+    captions_input = Input(shape=(max_length,))
+    captions_embed = Embedding(vocab_size, 256, mask_zero=True)(captions_input)
+    captions_lstm = LSTM(256, return_sequences=True)(captions_embed)
 
-    decoder1 = Add()([fe2, se3])
-    decoder2 = Dense(256, activation='relu')(decoder1)
-    outputs = Dense(vocab_size, activation='softmax')(decoder2)
+    # Combine features + captions with attention
+    merged = Concatenate(axis=-1)([features_repeat, captions_lstm])
+    attention = Dense(1, activation='tanh')(merged)
+    attention = Activation('softmax')(attention)
+    context = attention * captions_lstm
+    context = LSTM(256)(context)
 
-    model = Model(inputs=[inputs1, inputs2], outputs=outputs)
+    output = Dense(256, activation='relu')(context)
+    output = Dense(vocab_size, activation='softmax')(output)
+
+    model = Model(inputs=[features_input, captions_input], outputs=output)
     return model
