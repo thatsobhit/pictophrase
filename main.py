@@ -7,7 +7,7 @@ from app.inference import generate_caption
 from app.speech import text_to_speech
 
 IMG_PATH = 'data/sample_images/sample.jpg'
-MODEL_PATH = 'data/model.h5'
+MODEL_PATH = 'model.h5'
 TOKENIZER_PATH = 'data/tokenizer.pkl'
 MAX_LENGTH = 34  # Update as per your training
 
