@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PictoPhrase</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 2em; }
+        img { max-width: 400px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🧠 PictoPhrase</h1>
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="image" accept="image/*" required>
+        <button type="submit">Generate Caption</button>
+    </form>
+
+    {% if image_path %}
+    <div>
+        <img src="{{ image_path }}" alt="Uploaded Image">
+        <h2>📝 Caption:</h2>
+        <p>{{ caption }}</p>
+    </div>
+    {% endif %}
+</body>
+</html>
